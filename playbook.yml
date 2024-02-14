@@ -1,0 +1,85 @@
+---
+- hosts: all
+  become: yes
+  
+
+  tasks:
+    - name: Install packages
+      dnf: "name={{ item }} state=present"
+      with_items:
+        - python3-pip
+        - python3
+        - postgresql
+        - postgresql-server
+        
+    - name: if PostgreSQL initialized
+      ansible.builtin.stat:
+        path: "/var/lib/pgsql/data/pg_hba.conf"
+      register: postgres_data
+
+    - name: "Initialize PostgreSQL"
+      shell: "postgresql-setup initdb"
+      when: not postgres_data.stat.exists
+      
+    - name: Allow md5 connection for the all user
+      postgresql_pg_hba:
+        dest: "/var/lib/pgsql/data/pg_hba.conf"
+        contype: host
+        databases: all
+        source: 127.0.0.1/32
+        method: md5
+        users: "all"
+        create: true
+      become: yes
+      become_user: root
+      
+    - name: Allow md5 connection for the worker user 
+      postgresql_pg_hba:
+        dest: "/var/lib/pgsql/data/pg_hba.conf"
+        contype: host
+        databases: app
+        source: all
+        method: md5
+        users: "worker"
+        create: true
+      become: yes
+      become_user: root
+       
+     
+    - name: "Start and enable services"
+      service: "name={{ item }} state=started enabled=yes"
+      with_items:
+        - postgresql
+  
+    - name: Install specified python requirements offline from a local directory with downloaded packages
+      pip:            
+       requirements: /vagrant/requirements.txt
+  
+    - name: Create test database PostgreSQL
+      become: yes
+      become_user: postgres
+      vars:
+        database: app
+        username: worker
+        password: worker
+        password_for_default_postgres_user: lockon48
+      block:
+        - postgresql_user:
+            name: postgres
+            password: '{{ password_for_default_postgres_user }}'
+        - postgresql_db:
+            db: '{{ database }}'
+            encoding: UTF-8
+            state: present
+        - postgresql_user:
+            db: '{{ database }}'
+            name: '{{ username }}'
+            password: '{{ password }}'
+            state: present
+            expires: infinity
+            priv: CREATE,CONNECT,TEMPORARY
+        - postgresql_db:
+            db: '{{ database }}'
+            owner: '{{ username }}'
+            encoding: UTF-8
+            state: present
