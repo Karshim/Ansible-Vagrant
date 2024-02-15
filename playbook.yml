@@ -83,3 +83,16 @@
             owner: '{{ username }}'
             encoding: UTF-8
             state: present
+            
+
+
+    - name: run script
+      command: /vagrant/script.sh
+      async: true
+      poll: 0
+
+    - name: App is running? 
+      wait_for:
+        host: localhost
+        port: 5000
+        state: started
