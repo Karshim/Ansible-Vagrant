@@ -120,3 +120,7 @@
         host: localhost
         port: 5000
         state: started
+        
+    - name: get list users
+      uri:
+        url: http://127.0.0.1:5000/api/user

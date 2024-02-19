@@ -1,6 +1,7 @@
 #!/bin/bash
+source /app/.venv/bin/activate
 
-cd /vagrant/
+cd /app/
 
 export FLASK_APP=app.py
 export POSTGRESQL_URL=postgresql://worker:worker@localhost/app
