@@ -124,3 +124,11 @@
     - name: get list users
       uri:
         url: http://127.0.0.1:5000/api/user
+        method: GET
+        return_content: yes
+        status_code: 200
+      register: response
+      
+    - name: Print response content
+      debug:
+        var: response.content
