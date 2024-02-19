@@ -121,6 +121,23 @@
         port: 5000
         state: started
         
+    - name: Send POST request
+      uri:
+        url: http://127.0.0.1:5000/api/user
+        method: POST
+        body_format: json
+        body:
+          username: user123
+          email: user@example.com
+          password_hash: example
+        headers:
+          Content-Type: application/json
+      register: response
+
+    - name: Display response
+      debug:
+        var: response        
+
     - name: get list users
       uri:
         url: http://127.0.0.1:5000/api/user
@@ -128,7 +145,7 @@
         return_content: yes
         status_code: 200
       register: response
-      
+
     - name: Print response content
       debug:
         var: response.content
