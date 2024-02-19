@@ -8,9 +8,11 @@
       dnf: "name={{ item }} state=present"
       with_items:
         - python3-pip
-        - python3
+        - python3.6
         - postgresql
         - postgresql-server
+        - postgresql-devel
+        - git
         
     - name: if PostgreSQL initialized
       ansible.builtin.stat:
@@ -50,10 +52,27 @@
       service: "name={{ item }} state=started enabled=yes"
       with_items:
         - postgresql
-  
+
+
+    - name: clone a repository
+      git:
+        repo: https://github.com/mbaran0v/python-sample-app.git
+        dest: /app
+        clone: yes
+        update: yes
+        
+       
     - name: Install specified python requirements offline from a local directory with downloaded packages
       pip:            
-       requirements: /vagrant/requirements.txt
+       requirements: /app/requirements.txt
+       virtualenv: /app/.venv
+       virtualenv_command: /usr/bin/python3.6 -m venv
+
+    - name: Install specified postgres module
+      pip:            
+       name:
+       - psycopg2-binary
+  
   
     - name: Create test database PostgreSQL
       become: yes
@@ -84,10 +103,15 @@
             encoding: UTF-8
             state: present
             
+    - name: copy script
+      copy:
+        src: script.sh
+        dest: /app/script.sh
+        mode: '0755'
 
 
     - name: run script
-      command: /vagrant/script.sh
+      command: /app/script.sh
       async: true
       poll: 0
 
