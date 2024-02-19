@@ -35,6 +35,7 @@ sudo vagrant status
 ```
 
 6) По завершению работы скрипта Ansible тестовое приложение будет запущено, о чем будет сообщать статус задачи App is running? - Ок
+Также будет выводится ответ на запрос пользователей в приложении. 
+![image](https://github.com/Karshim/Ansible-Vagrant/assets/142340490/ce7404d9-426b-486a-b7c0-329a5dd248aa)
 
-![image](https://github.com/Karshim/Ansible-Vagrant/assets/142340490/c5b56864-b0e2-40d9-b44f-ab7bd47df9d5)
 
